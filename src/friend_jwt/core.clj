@@ -8,12 +8,10 @@
             [cemerick.friend.workflows :as workflows]
             [cemerick.friend.util :refer [gets]]
             [clj-jwt.core :refer :all]
-            [clj-jwt.key :refer [private-key]]
+            [clj-jwt.key :refer [public-key private-key]]
             [clj-time.core :refer [now plus seconds minutes hours days months before? after?]]
             [clj-time.coerce :refer [from-long to-long]]
             [cheshire.core :as json]))
-
-(def ^:dynamic *token-time-to-live* (minutes 2))
 
 (def users {"friend" {:username "friend"
                       :password (creds/hash-bcrypt "clojure")
@@ -24,74 +22,88 @@
 
 (derive ::admin ::user) ; admins are considered to be also users
 
-(defonce secret "theSecret") ; FIXME plain text secret in the source code says it all...
+(def jwt-service-config
+  {:algorithm :HS256 ; FIXME use asymmetric encryption
+   :private-key "theSecret" ; FIXME plain text secret in the source code says it all...
+   :token-time-to-live (minutes 2)})
 
-(defn generate-token-string [claim]
+(def jwt-client-config
+  {:algorithm :HS256 ; FIXME use asymmetric encryption
+   :public-key "theSecret"}) ; FIXME plain text secret in the source code says it all...
+
+
+;;; library code starts here...
+;;; ---------------------------------------------------------------------------
+(defn- make-token-string [claim service-config]
   (-> claim
       jwt
-      (sign :HS256 secret)
-      to-str)) ;; FIXME use asymmetric encryption
+      (sign (service-config :algorithm) (service-config :private-key))
+      to-str))
 
-(defn user-claim [user-record]
+(defn- user-claim [user-record token-time-to-live]
   {:user-id (user-record :username)
    ;; strip the user record of its password and convert it to an edn string
-   :user-record-string (str (dissoc user-record :passwd))
+   :user-record-string (str (dissoc user-record :password))
    ;; convert experiation and creation times to longs
-   :expiration (to-long (plus (now) *token-time-to-live*))
+   :expiration (to-long (plus (now) token-time-to-live))
    :creation (to-long (now))})
 
-(defn verify-jwt-token [jwt-token]
+(defn- verify-jwt-token [client-config jwt-token]
   (let [expiration (from-long (get-in jwt-token [:claims :expiration]))
         creation (from-long (get-in jwt-token [:claims :creation]))
         current-time (now)]
-    (and (verify jwt-token secret) ; FIXME use asymmetric encryption
+    (and (verify jwt-token (client-config :public-key))
          (not (after? current-time expiration))
          (not (before? current-time creation))
          jwt-token)))
 
-(defn decode-and-verify-token-string [token-string]
+(defn- decode-and-verify-token-string [client-config token-string]
   (try
-    (-> token-string str->jwt verify-jwt-token)
+    (let [jwt-token (str->jwt token-string)]
+      (verify-jwt-token client-config jwt-token))
     (catch Exception e
       nil)))
 
-(defn workflow-deny [& _]
-  {:status 401 :headers {"Content-Type" "text/plain"}}) ; FIXME maybe add a body that says "UNAUTHORIZED"
+(defn- workflow-deny [& _]
+  {:status 401 :headers {"Content-Type" "text/plain"}})
 
-(defn- authenticate [{:keys [credential-fn token-header] :as config} request]
-  ;; we expect a json body with :username and :password
-  (if-let [body (:body request)]
-    (let [{:keys [username password] :as credentials} (json/parse-string (slurp body) true)] ; FIXME json parsing should be done by the ring-format middleware
-      ;; check if the credentials are valid
-      (if-let [user-record (and username
-                                password
-                                (credential-fn (with-meta credentials {::friend/workflow ::jwt})))]
-
-        (let [token-string (generate-token-string (user-claim user-record))] ; create jwt token
-          (workflows/make-auth user-record
-            {::friend/workflow ::jwt
-             ::friend/redirect-on-auth? false
-             ::token-string token-string})
-          {:status 200 :headers {token-header token-string}})
-
-        (workflow-deny))) ; credentials are invalid
-
-    {:status 400 :headers {"Content-Type" "text/plain"}})) ; body is nil, no credentials present 
-
-(defn request->token-string [request token-header]
+(defn- request->token-string [request token-header]
   ((:headers request) (.toLowerCase token-header)))
 
-;(defn- reconstruct-user-record [json-user-record]
-;  (let [reconstructed-roles (into #{} (map (partial keyword "friend-jwt.core") (json-user-record :roles)))] ; FIXME hard-coded namespace
-;    {:username (json-user-record :username) :roles reconstructed-roles}))
+(defn- extend-token [{:keys [get-user-fn token-header client-config service-config] :as config} request]
+  (when-let [token-string (request->token-string request token-header)]
+    (when-let [token-user-record-string (get-in (decode-and-verify-token-string client-config token-string) [:claims :user-record-string])]
+      (let [token-user-record (read-string token-user-record-string)
+            token-user-name (:username token-user-record)]
+        (when-let [user-record (get-user-fn token-user-name)]
+          (let [token-time-to-live (service-config :token-time-to-live)
+                token-string (make-token-string (user-claim user-record token-time-to-live) service-config)] ; create jwt token
+            {:status 200 :headers {token-header token-string}}))))))
 
-(defn- read-token [{:keys [token-header] :as config} request]
-  (if-let [token-string (request->token-string request token-header)]
-    (if-let [user-record-string (get-in (decode-and-verify-token-string token-string) [:claims :user-record-string])]
+(defn- verify-token [{:keys [token-header client-config] :as config} request]
+  (when-let [token-string (request->token-string request token-header)]
+    (when-let [user-record-string (get-in (decode-and-verify-token-string client-config token-string) [:claims :user-record-string])]
       (workflows/make-auth (read-string user-record-string)
         {::friend/workflow ::jwt
          ::friend/redirect-on-auth? false
          ::token-string token-string}))))
+
+(defn- authenticate [{:keys [credential-fn token-header service-config] :as config} request]
+  ;; when a valid token is present, extend its life
+  (if (verify-token config request)
+    (extend-token config request)
+    ;; no valid token present, we expect a json body with :username and :password
+    (if-let [body (:body request)]
+      (let [{:keys [username password] :as credentials} (json/parse-string (slurp body) true)] ; FIXME json parsing should be done by the ring-format middleware
+        ;; check if the credentials are valid
+        (if-let [user-record (and username
+                                  password
+                                  (credential-fn (with-meta credentials {::friend/workflow ::jwt})))]
+          (let [token-time-to-live (service-config :token-time-to-live)
+                token-string (make-token-string (user-claim user-record token-time-to-live) service-config)] ; create jwt token
+            {:status 200 :headers {token-header token-string}})
+          (workflow-deny))) ; credentials are invalid
+      {:status 400 :headers {"Content-Type" "text/plain"}}))) ; body is nil, no credentials present 
 
 (defn- login-uri? [config request]
   (and (= (gets :login-uri config (::friend/auth-config request))
@@ -100,20 +112,19 @@
 
 (defn workflow [& {:as config}]
   (fn [request]
-    (if
-      (login-uri? config request)
+    (if (login-uri? config request)
       (authenticate config request)
-      (read-token config request))))
+      (verify-token config request))))
+
+;;; ---------------------------------------------------------------------------
+;;; library code ends here.
+
 
 (defroutes app-routes
   (GET "/" [] "Unauthenticated: Hello to you, stranger!\n")
   (GET "/all" req (friend/authenticated (str "Authenticated: Hello to you " (friend/current-authentication req) ", my good friend!!\n")))
   (GET "/user" [] (friend/authorize #{::user} "Authorized: Welcome, dear user!\n"))
   (GET "/admin" [] (friend/authorize #{::admin} "Authorized: Welcome, MASTER!\n"))
-  ;;(POST "/extend-token" []
-  ;;  (friend/authenticated
-  ;;    (friend-token/extend-life
-  ;;      {:status 200 :headers {}}))) ; TODO add a means to renew a token
   (route/resources "/")
   (route/not-found "Not Found"))
 
@@ -124,6 +135,8 @@
                     :login-uri "/authenticate"
                     :workflows [(workflow
                                   :token-header "X-Auth-Token"
+                                  :service-config jwt-service-config
+                                  :client-config jwt-client-config 
                                   :credential-fn (partial creds/bcrypt-credential-fn users)
                                   :get-user-fn users)]}))
 
