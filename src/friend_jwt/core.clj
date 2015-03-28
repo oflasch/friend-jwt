@@ -10,7 +10,7 @@
             [clj-jwt.core :refer :all]
             [clj-jwt.key :refer [public-key private-key]]
             [clj-time.core :refer [now plus seconds minutes hours days months before? after?]]
-            [clj-time.coerce :refer [from-long to-long]]
+            [clj-jwt.intdate :refer [intdate->joda-time]]
             [cheshire.core :as json]))
 
 (def users {"friend" {:username "friend"
@@ -40,21 +40,22 @@
       (sign (service-config :algorithm) (service-config :private-key))
       to-str))
 
+; TODO add support for the claims defined in https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32
 (defn- user-claim [user-record token-time-to-live]
   {:user-id (user-record :username)
    ;; strip the user record of its password and convert it to an edn string
    :user-record-string (str (dissoc user-record :password))
-   ;; convert experiation and creation times to longs
-   :expiration (to-long (plus (now) token-time-to-live))
-   :creation (to-long (now))})
+   ;; standard claims
+   :exp (plus (now) token-time-to-live)
+   :iat (now)})
 
 (defn- verify-jwt-token [client-config jwt-token]
-  (let [expiration (from-long (get-in jwt-token [:claims :expiration]))
-        creation (from-long (get-in jwt-token [:claims :creation]))
+  (let [expiration (intdate->joda-time (get-in jwt-token [:claims :exp]))
+        issued-at (intdate->joda-time (get-in jwt-token [:claims :iat]))
         current-time (now)]
     (and (verify jwt-token (client-config :public-key))
          (not (after? current-time expiration))
-         (not (before? current-time creation))
+         (not (before? current-time issued-at))
          jwt-token)))
 
 (defn- decode-and-verify-token-string [client-config token-string]
