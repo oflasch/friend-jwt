@@ -14,4 +14,5 @@
                  [ring/ring-core "1.3.2"]
                  [ring/ring-jetty-adapter "1.3.2"]
                  [ring/ring-defaults "0.1.4"]
+                 [ring/ring-mock "0.2.0"]
                  [compojure "1.3.2"]])
