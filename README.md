@@ -1,4 +1,4 @@
-# friend-jwt
+# friend-jwt [![Build Status](https://travis-ci.org/oflasch/friend-jwt.svg?branch=master)](https://travis-ci.org/oflasch/friend-jwt)
 
 A [JSON Web Token (JWT)](http://jwt.io) workflow for APIs using the
 [Friend](https://github.com/cemerick/friend) middleware for authentication.
