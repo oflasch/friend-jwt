@@ -1,6 +1,6 @@
 (defproject sourcewerk/friend-jwt "0.1.0-SNAPSHOT"
   :description "A JSON Web Token (JWT) workflow for APIs using the Friend middleware for authentication."
-  :url "http://example.com/FIXME"
+  :url "https://github.com/oflasch/friend-jwt"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]

@@ -5,7 +5,24 @@ A [JSON Web Token (JWT)](http://jwt.io) workflow for APIs using the
 
 ## Rationale
 
-TODO
+friend-jwt provides a JWT-based workflow for APIs using the Friend middleware
+for authentication and authorization. This workflow is designed for use in
+an authentication micro-service.
+
+Important characteristics:
+
+* based on the [clj-jwt](https://github.com/liquidz/clj-jwt) library
+* generated tokens contain a `user-record-string` claim 
+  * it contains the subjects username and roles encoded as an edn string
+  * this claim can be used to authorize a request without access to the
+    friend user database, improving simplicity and scalability
+* generated tokens are not stored in any way
+  * this makes it impossible to retract tokens, therefore token lifetime
+    should be limited to a reasonable short duration (e.g. 1 to 10 minutes)
+  * system clocks of both the authentication micro-service and of services
+    that use tokens to authorize requests must be reliable
+  * token lifetime can be extended without providing friend credentials
+    again, see the usage example below
 
 ## Installation
 
@@ -19,7 +36,7 @@ friend-jwt is available in Clojars. Add this `:dependency` to your Leiningen
 ## Usage
 
 The following code implements a very basic authentication service (also
-available as TODO):
+available in the repo at TODO):
 
 ```clojure
 (ns sourcewerk.friend-jwt.examples.auth-service
