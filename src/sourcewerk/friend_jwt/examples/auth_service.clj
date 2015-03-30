@@ -1,27 +1,3 @@
-# friend-jwt
-
-A [JSON Web Token (JWT)](http://jwt.io) workflow for APIs using the
-[Friend](https://github.com/cemerick/friend) middleware for authentication.
-
-## Rationale
-
-TODO
-
-## Installation
-
-friend-jwt is available in Clojars. Add this `:dependency` to your Leiningen
-`project.clj`:
-
-```clojure
-[sourcewerk/friend-jwt "0.1.0-SNAPSHOT"]
-```
-
-## Usage
-
-The following code implements a very basic authentication service (also
-available as TODO):
-
-```clojure
 (ns sourcewerk.friend-jwt.examples.auth-service
   (:require [sourcewerk.friend-jwt.core :as friend-jwt]
             [ring.adapter.jetty :as jetty]
@@ -79,17 +55,4 @@ available as TODO):
 
 (defn -main [& args]
   (jetty/run-jetty app {:port 3000}))
-```
 
-This service can be consumed via JSON requests. The following examples use 
-[cURL](http://curl.haxx.se):
-
-```bash
-TODO
-```
-
-## License
-
-Copyright © 2015 sourcewerk UG, Oliver Flasch 
-
-Distributed under the Eclipse Public License version 1.0.

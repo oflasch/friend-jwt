@@ -1,10 +1,10 @@
-(ns friend-jwt.core-test
+(ns sourcewerk.friend-jwt.core-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :refer :all]
             [cemerick.friend :as friend]
             [cemerick.friend.credentials :as creds]
             [clj-time.core :refer [seconds minutes now date-time]]
-            [friend-jwt.core :refer :all]))
+            [sourcewerk.friend-jwt.core :refer :all]))
 
 (def test-users {"friend" {:username "friend"
                            :password (creds/hash-bcrypt "clojure")
