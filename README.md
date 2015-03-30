@@ -37,7 +37,8 @@ friend-jwt is available in Clojars. Add this `:dependency` to your Leiningen
 ## Usage
 
 The following code implements a very basic authentication service (also
-available in the repo at TODO):
+available in the repo at
+[repo/blob/master/src/sourcewerk/friend_jwt/examples/auth_service.clj]):
 
 ```clojure
 (ns sourcewerk.friend-jwt.examples.auth-service
