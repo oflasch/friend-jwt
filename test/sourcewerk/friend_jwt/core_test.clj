@@ -46,7 +46,7 @@
                    (body "{\"username\": \"greg\", \"password\": \"kaktus\"}"))))
              {:status 200 
               :headers {"Content-Type" "text/plain"
-                        "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6ZnJpZW5kLWp3dC5jb3JlLXRlc3RcL2FkbWlufX0iLCJzdWIiOiJncmVnIiwiZXhwIjozMTU1NzYzMDAsImlhdCI6MzE1NTc2MDAwfQ.-XPyaW1N70MVtyo4EQMBz3S6IfXpvEI3oqfGmx-YB9k"}})))
+                        "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6c291cmNld2Vyay5mcmllbmQtand0LmNvcmUtdGVzdFwvYWRtaW59fSIsInN1YiI6ImdyZWciLCJleHAiOjMxNTU3NjMwMCwiaWF0IjozMTU1NzYwMDB9._WyumkNpiWh_PAsHhGjPiJzdyda3TYUgQuYYyQZwAx8"}})))
     (testing "extension request with invalid token"
       (is (= (with-redefs [now (fn [& _] (date-time 1980 1 1 12 0))]
                (test-workflow-HS256
@@ -58,23 +58,23 @@
       (is (= (with-redefs [now (fn [& _] (date-time 1980 1 1 12 6))]
                (test-workflow-HS256
                  (-> (request :post "/auth")
-                   (header "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6ZnJpZW5kLWp3dC5jb3JlLXRlc3RcL2FkbWlufX0iLCJzdWIiOiJncmVnIiwiZXhwIjozMTU1NzYzMDAsImlhdCI6MzE1NTc2MDAwfQ.-XPyaW1N70MVtyo4EQMBz3S6IfXpvEI3oqfGmx-YB9k"))))
+                   (header "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6c291cmNld2Vyay5mcmllbmQtand0LmNvcmUtdGVzdFwvYWRtaW59fSIsInN1YiI6ImdyZWciLCJleHAiOjMxNTU3NjMwMCwiaWF0IjozMTU1NzYwMDB9._WyumkNpiWh_PAsHhGjPiJzdyda3TYUgQuYYyQZwAx8"))))
              {:status 400 
               :headers {"Content-Type" "text/plain"}})))
     (testing "extension request with forged token"
       (is (= (with-redefs [now (fn [& _] (date-time 1980 1 1 11 0))]
                (test-workflow-HS256
                  (-> (request :post "/auth")
-                   (header "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6ZnJpZW5kLWp3dC5jb3JlLXRlc3RcL2FkbWlufX0iLCJzdWIiOiJncmVnIiwiZXhwIjozMTU1NzYzMDAsImlhdCI6MzE1NTc2MDAwfQ.-XPyaW1N70MVtyo4EQMBz3S6IfXpvEI3oqfGmx-YB9k"))))
+                   (header "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6c291cmNld2Vyay5mcmllbmQtand0LmNvcmUtdGVzdFwvYWRtaW59fSIsInN1YiI6ImdyZWciLCJleHAiOjMxNTU3NjMwMCwiaWF0IjozMTU1NzYwMDB9._WyumkNpiWh_PAsHhGjPiJzdyda3TYUgQuYYyQZwAx8"))))
              {:status 400 
               :headers {"Content-Type" "text/plain"}})))
     (testing "extension request with valid token"
       (is (= (with-redefs [now (fn [& _] (date-time 1980 1 1 12 4))]
                (test-workflow-HS256
                  (-> (request :post "/auth")
-                   (header "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6ZnJpZW5kLWp3dC5jb3JlLXRlc3RcL2FkbWlufX0iLCJzdWIiOiJncmVnIiwiZXhwIjozMTU1NzYzMDAsImlhdCI6MzE1NTc2MDAwfQ.-XPyaW1N70MVtyo4EQMBz3S6IfXpvEI3oqfGmx-YB9k"))))
+                   (header "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6c291cmNld2Vyay5mcmllbmQtand0LmNvcmUtdGVzdFwvYWRtaW59fSIsInN1YiI6ImdyZWciLCJleHAiOjMxNTU3NjMwMCwiaWF0IjozMTU1NzYwMDB9._WyumkNpiWh_PAsHhGjPiJzdyda3TYUgQuYYyQZwAx8"))))
              {:status 200 
               :headers {"Content-Type" "text/plain"
-                        "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6ZnJpZW5kLWp3dC5jb3JlLXRlc3RcL2FkbWlufX0iLCJzdWIiOiJncmVnIiwiZXhwIjozMTU1NzY1NDAsImlhdCI6MzE1NTc2MjQwfQ.dPolqs3UM34EqvAxvj9Ko_bAuNrl4tn9wh4sOs1W0Eo"}}))) ))
+                        "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6c291cmNld2Vyay5mcmllbmQtand0LmNvcmUtdGVzdFwvYWRtaW59fSIsInN1YiI6ImdyZWciLCJleHAiOjMxNTU3NjU0MCwiaWF0IjozMTU1NzYyNDB9.yhqFsJ_N6OMNM1WgnTk1PJc9LR_R1WPx1XBOt4aC2X4"}}))) ))
 
 ;; TODO test extension request for a deleted user
