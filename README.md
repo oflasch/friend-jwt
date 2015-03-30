@@ -3,7 +3,7 @@
 A [JSON Web Token (JWT)](http://jwt.io) workflow for APIs using the
 [Friend](https://github.com/cemerick/friend) middleware for authentication.
 
-**friend-jwt is work in progress, please report any issues you might encouter.**
+**friend-jwt is work in progress, please report any issues you might encounter.**
 
 ## Rationale
 
