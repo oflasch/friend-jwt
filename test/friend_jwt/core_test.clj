@@ -77,3 +77,4 @@
               :headers {"Content-Type" "text/plain"
                         "X-Auth-Token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLXJlY29yZC1zdHJpbmciOiJ7OnVzZXJuYW1lIFwiZ3JlZ1wiLCA6cm9sZXMgI3s6ZnJpZW5kLWp3dC5jb3JlLXRlc3RcL2FkbWlufX0iLCJzdWIiOiJncmVnIiwiZXhwIjozMTU1NzY1NDAsImlhdCI6MzE1NTc2MjQwfQ.dPolqs3UM34EqvAxvj9Ko_bAuNrl4tn9wh4sOs1W0Eo"}}))) ))
 
+;; TODO test extension request for a deleted user
