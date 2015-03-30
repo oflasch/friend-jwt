@@ -8,8 +8,8 @@ A [JSON Web Token (JWT)](http://jwt.io) workflow for APIs using the
 ## Rationale
 
 friend-jwt provides a JWT-based workflow for APIs using the Friend middleware
-for authentication and authorization. This workflow is designed for use in
-an authentication micro-service.
+for authentication and authorization. This workflow is intended to be used in
+an authentication [microservice](http://microservices.io).
 
 Important characteristics:
 
