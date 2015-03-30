@@ -13,7 +13,8 @@ Important characteristics:
 
 * based on the [clj-jwt](https://github.com/liquidz/clj-jwt) library
 * generated tokens contain a `user-record-string` claim 
-  * it contains the subjects username and roles encoded as an edn string
+  * it contains the subject's identiy (friend username) and roles encoded as
+    an [edn](https://clojure.github.io/clojure/clojure.edn-api.html) string
   * this claim can be used to authorize a request without access to the
     friend user database, improving simplicity and scalability
 * generated tokens are not stored in any way
