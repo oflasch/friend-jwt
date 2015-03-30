@@ -3,6 +3,8 @@
 A [JSON Web Token (JWT)](http://jwt.io) workflow for APIs using the
 [Friend](https://github.com/cemerick/friend) middleware for authentication.
 
+**friend-token is work in progress, please report any issues you might encouter.**
+
 ## Rationale
 
 friend-jwt provides a JWT-based workflow for APIs using the Friend middleware
@@ -98,12 +100,33 @@ available [in the repo](https://github.com/oflasch/friend-jwt/blob/master/src/so
 (defn -main [& args]
   (jetty/run-jetty app {:port 3000}))
 ```
-
-This service can be consumed via JSON requests. The following examples use 
+You can also use `lein run` to start this example service. It can then be
+consumed via JSON requests. The following examples use 
 [cURL](http://curl.haxx.se):
 
+Authenticate with username `greg` and password `kaktus` by `POST`ing
+JSON-encoded credentials to the friend-configured `login-uri`:
+
 ```bash
-TODO
+curl -X POST -H "Content-type: application/json" -d '{"username": "greg", "password": "kaktus"}' http://localhost:3000/authenticate -i
+```
+
+This should return a HTTP response with status 200 (OK) and a token valid for
+2 minutes provided in the `X-Auth-Token` header. You can check this token at
+the [JWT website](http://jwt.io).
+
+This token can then be used to authenticate requests be providing it in the
+`X-Auth-Token` header:
+
+```bash
+curl -i 'http://localhost:3000/all' -H "Accept: application/json" -H "X-Auth-Token: <the token>"
+```
+
+To extend the token's lifetime, `POST` to the friend-configured `login-uri`  
+with the token provided in the `X-Auth-Token` header: 
+
+```bash
+curl -X POST -H "X-Auth-Token: <the token>" http://localhost:3000/authenticate -i
 ```
 
 ## License
@@ -111,3 +134,4 @@ TODO
 Copyright © 2015 [sourcewerk UG](http://sourcewerk.de), Oliver Flasch 
 
 Distributed under the Eclipse Public License version 1.0.
+
