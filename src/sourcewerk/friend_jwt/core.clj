@@ -24,9 +24,14 @@
       jwt
       (sign (service-config :algorithm) (service-config :private-key))))
 
+(defn- intdate->joda-time-or-nil [intdate]
+  (if (integer? intdate)
+    (intdate->joda-time intdate)
+    nil))
+
 (defn- verify-jwt-token [client-config jwt-token]
-  (let [expiration (intdate->joda-time (get-in jwt-token [:claims :exp]))
-        issued-at (intdate->joda-time (get-in jwt-token [:claims :iat]))
+  (let [expiration (intdate->joda-time-or-nil (get-in jwt-token [:claims :exp]))
+        issued-at (intdate->joda-time-or-nil (get-in jwt-token [:claims :iat]))
         current-time (now)]
     (and (verify jwt-token (client-config :public-key))
          (not (after? current-time expiration))
@@ -86,6 +91,7 @@
        (= :post (:request-method request))))
 
 (defn workflow [& {:as config}]
+  "A friend workflow using JSON Web Tokens (JWT)."
   (fn [request]
     (if (login-uri? config request)
       (authenticate config request)
