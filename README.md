@@ -131,7 +131,7 @@ curl -X POST -H "X-Auth-Token: <the token>" http://localhost:3000/authenticate -
 
 ## License
 
-Copyright © 2015 [sourcewerk UG](http://sourcewerk.de), Oliver Flasch 
+Copyright © 2015 [sourcewerk GmbH](http://sourcewerk.de), Oliver Flasch 
 
 Distributed under the Eclipse Public License version 1.0.
 
